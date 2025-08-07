@@ -1,3 +1,10 @@
-/.idea/
-/.phpunit.cache/
 /vendor/
+.idea/
+.DS_Store
+
+# PHPUnit & coverage
+/.phpunit.cache
+/tests/coverage/
+
+# PHP CS Fixer
+.php-cs-fixer.cache
