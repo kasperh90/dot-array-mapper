@@ -9,7 +9,7 @@ use Kasperhansen\DotArrayMapper\Contracts\DotArrayMapperInterface;
 /**
  * @author Kasper Hansen <kasper.h90@gmail.com>
  */
-class DotArrayMapper implements DotArrayMapperInterface
+final class DotArrayMapper implements DotArrayMapperInterface
 {
     /**
      * @var array<string, mixed>
@@ -22,19 +22,48 @@ class DotArrayMapper implements DotArrayMapperInterface
     private array $mapping = [];
 
     /**
+     * @var array<string, callable>
+     */
+    private array $filters = [];
+
+    /**
      * @inheritDoc
      */
-    public function setData(array $data): void
+    public function setData(array $data): self
     {
         $this->data = $data;
+
+        return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function map(array $mapping): void
+    public function map(array $mapping): self
     {
         $this->mapping = $mapping;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addFilter(string $key, callable $filter): self
+    {
+        $this->filters[$key] = $filter;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addFilters(array $filters): self
+    {
+        $this->filters += $filters;
+
+        return $this;
     }
 
     /**
@@ -67,13 +96,31 @@ class DotArrayMapper implements DotArrayMapperInterface
      */
     public function extract(): array
     {
+        trigger_error(
+            'DotArrayMapper::extract() is deprecated. Use transform() instead.',
+            E_USER_DEPRECATED
+        );
+
+        return $this->transform();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function transform(): array
+    {
         $result = [];
 
         foreach ($this->mapping as $key => $path) {
             $value = $this->getValueFromPath($path);
 
-            if (null === $value) {
-                continue;
+            // Apply filters if any are defined for the key
+            if (array_key_exists($key, $this->filters)) {
+                $filter = $this->filters[$key];
+
+                if (null !== $value) {
+                    $value = $filter($value);
+                }
             }
 
             $result[$key] = $value;

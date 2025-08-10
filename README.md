@@ -16,22 +16,23 @@ use Kasperhansen\DotArrayMapper;
 $mapper = new DotArrayMapper();
 
 // Set the data to be mapped
-$mapper->setData([
-    'user' => [
-        'name' => 'John Doe',
-        'email' => 'john@doe.com',
-        'address' => [
-            'city' => 'New York',
+$mapper
+    ->setData([
+        'user' => [
+            'name' => 'John Doe',
+            'email' => 'john@doe.com',
+            'address' => [
+                'city' => 'New York',
+            ],
         ],
-    ],
-]);
-
-// Define the mapping using dot notation
-$mapper->map([
-    'name' => 'user.name',
-    'email' => 'user.email',
-    'city' => 'user.address.city',
-]);
+    ])
+    ->map([
+        'name' => 'user.name',
+        'email' => 'user.email',
+        'city' => 'user.address.city',
+    ])
+    ->addFilter('name', fn($value) => strtoupper($value))
+    ->addFilter('email', fn($value) => strtolower($value));
 
 // Extract the mapped data
 $mappedData = $mapper->extract();
